@@ -1,0 +1,2 @@
+import {headers}from'next/headers';import {AuditLog}from'@/src/database/models/AuditLog';import type{Session}from'@/src/lib/auth/session';
+export async function audit(session:Session,action:string,targetType:string,targetId?:string,metadata:Record<string,unknown>={}){const h=await headers();const ip=h.get('x-forwarded-for')?.split(',')[0]?.trim()||h.get('x-real-ip')||undefined;await AuditLog.create({actorId:session.userId,actorRole:session.role,action,targetType,targetId,ip,status:'success',metadata})}

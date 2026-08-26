@@ -1,0 +1,3 @@
+import mongoose,{Schema,model,type Model,type Types}from'mongoose';
+export interface ISupportTicket{_id:Types.ObjectId;userId:Types.ObjectId;subject:string;message:string;status:'open'|'in_progress'|'resolved';createdAt:Date;updatedAt:Date}
+const schema=new Schema<ISupportTicket>({userId:{type:Schema.Types.ObjectId,ref:'User',required:true,index:true},subject:{type:String,required:true,maxlength:150},message:{type:String,required:true,maxlength:4000},status:{type:String,enum:['open','in_progress','resolved'],default:'open',index:true}},{timestamps:true,versionKey:false});export const SupportTicket=(mongoose.models.SupportTicket as Model<ISupportTicket>)||model<ISupportTicket>('SupportTicket',schema);

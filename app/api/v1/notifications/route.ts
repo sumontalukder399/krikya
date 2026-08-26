@@ -1,0 +1,3 @@
+import{connectDatabase}from'@/src/database/connection';import{Notification}from'@/src/database/models/Notification';import{currentSession}from'@/src/server/auth';import{fail,ok}from'@/src/utils/api-response';
+export async function GET(){const s=await currentSession();if(!s)return fail('Unauthorized',401);await connectDatabase();return ok(await Notification.find({userId:s.userId}).sort({createdAt:-1}).limit(100).lean())}
+export async function PATCH(req:Request){const s=await currentSession();if(!s)return fail('Unauthorized',401);const{id}=await req.json();await connectDatabase();const row=await Notification.findOneAndUpdate({_id:id,userId:s.userId},{$set:{readAt:new Date()}},{returnDocument:'after'});return row?ok(row):fail('Not found',404)}

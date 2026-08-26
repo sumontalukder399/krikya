@@ -1,0 +1,6 @@
+{
+  "name": "Krikya Gaming Platform",
+  "description": "Comprehensive responsive online gaming, sportsbook, live casino, and reward platform recreation based on the exact UI/UX reference.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

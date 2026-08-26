@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@layer base {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+/* Custom styles matching Krikya visual design */
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff5a00;
+}
+
+/* Hide scrollbar for tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Shimmer and pulse effects */
+@keyframes goldGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 179, 0, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(255, 179, 0, 0.8); }
+}
+
+.glow-gold {
+  animation: goldGlow 2s infinite;
+}
+
+/* Smooth custom transitions */
+.transition-dropdown {
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.live-winners-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+.live-winners-scroll::-webkit-scrollbar-track {
+  background: #f8f8f8;
+  border-radius: 999px;
+}
+
+.live-winners-scroll::-webkit-scrollbar-thumb {
+  background: #999;
+  border: 3px solid #f8f8f8;
+  border-radius: 999px;
+}
+
+.live-winners-scroll::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+@keyframes krikyaLoadingProgress {
+  0% { transform: scaleX(0); transform-origin: left; }
+  70% { transform: scaleX(.72); transform-origin: left; }
+  100% { transform: scaleX(1); transform-origin: left; }
+}
+
+.krikya-loading-progress {
+  animation: krikyaLoadingProgress 650ms ease-out forwards;
+}
+
+@keyframes adminRise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-rise {
+  opacity: 0;
+  animation: adminRise .55s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-rise { opacity: 1; animation: none; }
+}
