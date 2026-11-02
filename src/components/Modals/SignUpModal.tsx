@@ -206,7 +206,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                             type="tel"
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value)}
-                            placeholder="1768662245"
+                            placeholder="1XXXXXXXXX"
                             className="flex-1 bg-[#e9ecef] border border-gray-300 rounded-md px-3 py-2 text-xs font-medium text-gray-900 focus:bg-white focus:outline-hidden focus:border-[#2e694d] transition"
                             required
                           />
