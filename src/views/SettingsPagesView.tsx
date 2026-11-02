@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { errorMessage } from '../platform/api';
+import { player, type Notification } from '../platform/player';
 import { PageType, UserProfile } from '../types';
 import { 
   User, 
@@ -19,12 +21,11 @@ import {
 } from 'lucide-react';
 
 interface SettingsPagesViewProps {
-  type: 'personal' | 'password' | 'bank' | 'inbox' | 'referral' | 'affiliate';
+  type: 'personal' | 'password' | 'inbox' | 'referral' | 'affiliate';
   user: UserProfile;
   onNavigate: (page: PageType) => void;
   onOpenEditProfile: () => void;
-  onOpenAddBank: () => void;
-  onUpdatePassword?: (newPass: string) => void;
+  onInboxRead: () => void;
 }
 
 export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
@@ -32,7 +33,7 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
   user,
   onNavigate,
   onOpenEditProfile,
-  onOpenAddBank,
+  onInboxRead,
 }) => {
   // Password change state
   const [oldPassword, setOldPassword] = useState('');
@@ -41,16 +42,25 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
-  // Bank accounts
-  const [bankAccounts, setBankAccounts] = useState([
-    { id: 1, bank: 'Nagad', name: user.fullName || 'Hridoy Sonar', account: user.phone || '01768662245', isDefault: true },
-    { id: 2, bank: 'bKash', name: user.fullName || 'Hridoy Sonar', account: '01768662245', isDefault: false },
-  ]);
+  // Inbox
+  const [messages, setMessages] = useState<Notification[]>([]);
+  const [inboxLoading, setInboxLoading] = useState(false);
+  useEffect(() => {
+    if (type !== 'inbox') return;
+    setInboxLoading(true);
+    player.notifications().then((list) => {
+      setMessages(list);
+      return player.markAllRead().then(onInboxRead).catch(() => undefined);
+    }).catch(() => setMessages([])).finally(() => setInboxLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
 
-  // Affiliate application form
-  const [trafficSource, setTrafficSource] = useState('Telegram Channel / Facebook Group');
-  const [experience, setExperience] = useState('2+ years in sports betting marketing');
+  // Affiliate application, sent to the operator as a support ticket
+  const [affiliateContact, setAffiliateContact] = useState('');
+  const [trafficSource, setTrafficSource] = useState('');
+  const [experience, setExperience] = useState('');
   const [affiliateSubmitted, setAffiliateSubmitted] = useState(false);
+  const [affiliateError, setAffiliateError] = useState('');
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,9 +69,12 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
       return;
     }
     setPasswordError('');
-    const response = await fetch('/api/v1/profile', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'password', oldPassword, newPassword }) });
-    const json = await response.json();
-    if (!response.ok) { setPasswordError(json.error?.message || 'Could not update password'); return; }
+    try {
+      await player.changePassword(oldPassword, newPassword);
+    } catch (err) {
+      setPasswordError(errorMessage(err, 'Could not update password'));
+      return;
+    }
     setPasswordSuccess(true);
     setTimeout(() => {
       setPasswordSuccess(false);
@@ -71,10 +84,18 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
     }, 2500);
   };
 
-  const handleAffiliateSubmit = (e: React.FormEvent) => {
+  const handleAffiliateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAffiliateSubmitted(true);
+    setAffiliateError('');
+    try {
+      await player.createTicket('Affiliate application', `Contact: ${affiliateContact}\nTraffic source: ${trafficSource}\nExperience: ${experience}`);
+      setAffiliateSubmitted(true);
+    } catch (err) {
+      setAffiliateError(errorMessage(err, 'Could not send your application.'));
+    }
   };
+
+  const referralLink = `${typeof window === 'undefined' ? '' : window.location.origin}/?ref=${user.referralCode}`;
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 space-y-4 pb-16">
@@ -112,7 +133,7 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
 
             <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
               <span className="text-gray-400 block text-[10px] uppercase font-bold">Full Name</span>
-              <span className="text-sm font-bold text-gray-800 mt-0.5 block">{user.fullName || 'Hridoy Sonar'}</span>
+              <span className="text-sm font-bold text-gray-800 mt-0.5 block">{user.fullName}</span>
             </div>
 
             <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
@@ -123,11 +144,6 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
             <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
               <span className="text-gray-400 block text-[10px] uppercase font-bold">Phone Number</span>
               <span className="text-sm font-bold text-gray-800 font-mono mt-0.5 block">{user.phone}</span>
-            </div>
-
-            <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-              <span className="text-gray-400 block text-[10px] uppercase font-bold">Date of Birth</span>
-              <span className="text-sm font-bold text-gray-800 mt-0.5 block">{user.dateOfBirth || '1998-05-14'}</span>
             </div>
 
             <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
@@ -201,82 +217,25 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
         </div>
       )}
 
-      {/* 3. BANK DETAILS VIEW */}
-      {type === 'bank' && (
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h2 className="text-base font-extrabold text-gray-800 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-[#0e5332]" />
-              <span>Saved Bank & Mobile Accounts</span>
-            </h2>
-            <button
-              onClick={onOpenAddBank}
-              className="bg-[#0e5332] hover:bg-[#0a3e25] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-2xs transition"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Account</span>
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {bankAccounts.map((acc) => (
-              <div
-                key={acc.id}
-                className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-between"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-xs text-gray-900">{acc.bank}</span>
-                    {acc.isDefault && (
-                      <span className="bg-emerald-100 text-[#0e5332] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        Default
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">Holder: {acc.name}</div>
-                  <div className="text-xs font-mono font-bold text-gray-800">{acc.account}</div>
-                </div>
-
-                <button
-                  onClick={() => setBankAccounts((prev) => prev.filter((a) => a.id !== acc.id))}
-                  className="text-gray-400 hover:text-red-600 p-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 4. INBOX MESSAGES VIEW */}
+      {/* INBOX */}
       {type === 'inbox' && (
         <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs space-y-4">
           <h2 className="text-base font-extrabold text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-3">
             <Mail className="w-5 h-5 text-[#0e5332]" />
-            <span>Inbox Notifications</span>
+            <span>Inbox</span>
           </h2>
-
+          {inboxLoading && <p className="text-xs text-gray-500">Loading...</p>}
+          {!inboxLoading && messages.length === 0 && <p className="py-6 text-center text-xs text-gray-500">No messages yet.</p>}
           <div className="space-y-3">
-            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-200 space-y-1 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-black text-gray-900">Important: BKASH Scheduled Maintenance</span>
-                <span className="text-[10px] text-gray-400">2026-08-23 09:00</span>
+            {messages.map((msg) => (
+              <div key={msg.id} className={`p-4 rounded-xl border space-y-1 text-xs ${msg.isRead ? 'bg-gray-50 border-gray-200' : 'bg-emerald-50/50 border-emerald-200'}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-black text-gray-900">{msg.title}</span>
+                  <span className="shrink-0 text-[10px] text-gray-400">{new Date(msg.createdAt).toLocaleString()}</span>
+                </div>
+                {msg.message && <p className="text-gray-600 leading-relaxed">{msg.message}</p>}
               </div>
-              <p className="text-gray-600 leading-relaxed">
-                BKASH wallet is undergoing daily scheduled maintenance from 12AM-7AM (+GMT+6). Instant deposits and withdrawals remain active via Nagad-SpeedPay and Rocket.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-1 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-black text-gray-900">Welcome to Krikya VIP Club</span>
-                <span className="text-[10px] text-gray-400">2026-08-22 10:30</span>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                Your account is now registered! Make your first deposit to enjoy our 500% Super Welcome Bonus up to ৳20,000.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       )}
@@ -286,23 +245,14 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
         <div className="space-y-4">
           <div className="bg-gradient-to-r from-[#072718] via-[#0e5332] to-[#146b41] text-white rounded-2xl p-6 shadow-md">
             <span className="text-xs font-bold text-amber-300 uppercase tracking-widest block mb-1">
-              Deshi Krikya, Beshi Rewards!
-            </span>
+              Refer and Earn</span>
             <h1 className="text-2xl font-black uppercase text-white">Referral Program Summary</h1>
-            <p className="text-xs text-emerald-100 mt-1">
-              Invite players and earn weekly lifetime commissions with 55% rev-share rates.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs text-center">
               <span className="text-[10px] text-gray-400 uppercase font-bold block">Total Referrals</span>
               <span className="text-2xl font-black text-gray-900 mt-1 block">{user.totalReferrals}</span>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs text-center">
-              <span className="text-[10px] text-gray-400 uppercase font-bold block">Today Commission</span>
-              <span className="text-2xl font-black text-[#0e5332] mt-1 block">৳ {user.todayCommission.toFixed(2)}</span>
             </div>
 
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-2xs text-center">
@@ -317,13 +267,12 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
               <input
                 type="text"
                 readOnly
-                value={`https://krikya11.club/register?ref=${user.referralCode}`}
+                value={referralLink}
                 className="flex-1 bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs font-mono text-gray-700"
               />
               <button
                 onClick={() => {
-                  navigator.clipboard?.writeText(`https://krikya11.club/register?ref=${user.referralCode}`);
-                  alert('Referral link copied!');
+                  navigator.clipboard?.writeText(referralLink);
                 }}
                 className="bg-[#ff5a00] hover:bg-[#e04f00] text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1 transition"
               >
@@ -350,10 +299,13 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
             </div>
           ) : (
             <form onSubmit={handleAffiliateSubmit} className="space-y-3 text-xs">
+              {affiliateError && <p className="font-semibold text-red-600">{affiliateError}</p>}
               <div>
                 <label className="block font-bold text-gray-700 mb-1">Telegram / WhatsApp Contact *</label>
                 <input
                   type="text"
+                  value={affiliateContact}
+                  onChange={(e) => setAffiliateContact(e.target.value)}
                   placeholder="@your_telegram_id or +88017XXXXXXXX"
                   className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs focus:bg-white focus:outline-hidden focus:border-[#0e5332]"
                   required
@@ -384,7 +336,7 @@ export const SettingsPagesView: React.FC<SettingsPagesViewProps> = ({
                 type="submit"
                 className="w-full bg-[#0e5332] hover:bg-[#0a3e25] text-white font-extrabold py-3 rounded-xl text-xs shadow-md transition cursor-pointer"
               >
-                Submit Affiliate Application (Up to 55% Rev-Share)
+                Submit Affiliate Application
               </button>
             </form>
           )}

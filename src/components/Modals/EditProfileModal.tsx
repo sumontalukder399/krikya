@@ -1,3 +1,5 @@
+import { errorMessage } from '../../platform/api';
+import { player } from '../../platform/player';
 import React, { useState } from 'react';
 import { X, User, Mail, Phone, Calendar } from 'lucide-react';
 import { UserProfile } from '../../types';
@@ -6,7 +8,7 @@ interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: UserProfile;
-  onSave: (updated: Partial<UserProfile>) => void;
+  onSave: () => void;
 }
 
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -16,9 +18,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   onSave,
 }) => {
   const [email, setEmail] = useState(user.email);
-  const [fullName, setFullName] = useState(user.fullName || 'Hridoy Sonar');
-  const [dateOfBirth, setDateOfBirth] = useState(user.dateOfBirth || '1998-05-14');
-  const [phoneNumber, setPhoneNumber] = useState(user.phone || '01768662245');
+  const [fullName, setFullName] = useState(user.fullName || '');
+  const [phoneNumber, setPhoneNumber] = useState(user.phone || '');
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
@@ -26,15 +27,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const response = await fetch('/api/v1/profile', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'profile', name: fullName, phone: phoneNumber }) });
-    const json = await response.json();
-    if (!response.ok) { setError(json.error?.message || 'Could not update profile'); return; }
-    onSave({
-      email,
-      fullName,
-      dateOfBirth,
-      phone: phoneNumber,
-    });
+    const [firstName, ...rest] = fullName.trim().split(/\s+/);
+    try {
+      await player.updateMe({ firstName, lastName: rest.join(' ') || undefined, phone: phoneNumber.trim() || undefined, email: email.trim() || undefined });
+    } catch (err) {
+      setError(errorMessage(err, 'Could not update profile'));
+      return;
+    }
+    onSave();
     onClose();
   };
 
@@ -71,17 +71,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               value={user.username}
               disabled
               className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-500 cursor-not-allowed font-semibold"
-            />
-          </div>
-
-          <div>
-            <label className="block font-bold text-gray-700 mb-1">Date of Birth *</label>
-            <input
-              type="date"
-              value={dateOfBirth}
-              onChange={(e) => setDateOfBirth(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-hidden focus:border-[#0e5332]"
-              required
             />
           </div>
 

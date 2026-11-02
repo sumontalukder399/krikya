@@ -1,2 +1,0 @@
-type Bucket={count:number;resetAt:number};const globalRate=globalThis as typeof globalThis&{rateBuckets?:Map<string,Bucket>};globalRate.rateBuckets??=new Map();
-export function rateLimit(key:string,limit=10,windowMs=60_000){const now=Date.now(),map=globalRate.rateBuckets!,current=map.get(key);if(!current||current.resetAt<=now){map.set(key,{count:1,resetAt:now+windowMs});return{allowed:true,retryAfter:0}}current.count++;return{allowed:current.count<=limit,retryAfter:Math.ceil((current.resetAt-now)/1000)}}

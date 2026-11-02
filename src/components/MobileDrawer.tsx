@@ -18,6 +18,7 @@ interface MobileDrawerProps {
   onOpenLogin: () => void;
   onOpenSignUp: () => void;
   onLogout: () => void;
+  onOpenContact: () => void;
 }
 
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({
@@ -30,6 +31,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onOpenLogin,
   onOpenSignUp,
   onLogout,
+  onOpenContact,
 }) => {
   const { language, setLanguage, t } = useLanguage();
   if (!isOpen) return null;
@@ -259,26 +261,6 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             </button>
 
             <button
-              onClick={() => handleLinkClick('krikbet')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition cursor-pointer ${
-                currentPage === 'krikbet' ? 'bg-orange-50/70 text-[#ff6a00] font-bold' : 'hover:bg-gray-50 text-gray-800'
-              }`}
-            >
-              <DrawerImageIcon name="krikbet challenge.jpeg" alt="Krikbet Challenge" />
-              <span className="text-[13px] font-bold">Krikbet Challenge</span>
-            </button>
-
-            <button
-              onClick={() => handleLinkClick('reward-store')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition cursor-pointer ${
-                currentPage === 'reward-store' ? 'bg-orange-50/70 text-[#ff6a00] font-bold' : 'hover:bg-gray-50 text-gray-800'
-              }`}
-            >
-              <StoreIcon />
-              <span className="text-[13px] font-bold">Reward Store</span>
-            </button>
-
-            <button
               onClick={() => handleLinkClick('vip')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition cursor-pointer ${
                 currentPage === 'vip' ? 'bg-orange-50/70 text-[#ff6a00] font-bold' : 'hover:bg-gray-50 text-gray-800'
@@ -391,7 +373,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             <div className="space-y-1 mt-1">
               <button
                 onClick={() => {
-                  alert('Opening 24/7 Live Chat Support...');
+                  onOpenContact();
                   onClose();
                 }}
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-gray-50 text-gray-800 cursor-pointer"

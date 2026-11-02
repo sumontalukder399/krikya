@@ -1,7 +1,0 @@
-{
-  "/api/v1/analytics/route": "app/api/v1/analytics/route.js",
-  "/icon.svg/route": "app/icon.svg/route.js",
-  "/api/v1/profile/route": "app/api/v1/profile/route.js",
-  "/affiliate/page": "app/affiliate/page.js",
-  "/page": "app/page.js"
-}

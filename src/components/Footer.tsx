@@ -21,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="mt-8 bg-[#d3d3d3] pb-[calc(84px+env(safe-area-inset-bottom))] pt-9 text-[#111] lg:pb-9">
       <div className="mx-auto w-full max-w-[1240px] px-4">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-16">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 md:gap-16">
           <section>
             <h4 className="mb-3 text-[12px] font-extrabold">{t('footer.payment_methods')}</h4>
             <Landmark className="h-9 w-9 text-[#707070]" strokeWidth={1.8} />
@@ -32,13 +32,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <div className="flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-current text-[14px] font-black">18+</div>
               <div className="flex h-8 w-8 items-center justify-center rounded bg-[#707070] text-[11px] font-black text-[#d3d3d3]">G</div>
               <div className="text-[9px] font-semibold leading-[1.05]">Be<br />Gamble<br />Aware</div>
-            </div>
-          </section>
-          <section>
-            <h4 className="mb-3 text-[12px] font-extrabold">{t('footer.certification')}</h4>
-            <div className="flex h-9 items-center gap-3">
-              <div className="flex h-8 items-center gap-1 rounded-md bg-[#666] px-2 text-[7px] font-black leading-tight text-white"><ShieldCheck className="h-4 w-4" /><span>CASINOS<br />ANALYZER</span></div>
-              <div className="flex items-center gap-1 text-[8px] font-black text-[#555]"><Award className="h-7 w-7" /><span>iTech<br />Labs</span></div>
             </div>
           </section>
           <section>
@@ -69,8 +62,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-[12px] font-bold text-[#29956e] md:justify-end">
               <button onClick={() => onNavigate('affiliate-apply')} className="cursor-pointer underline underline-offset-2">{t('footer.affiliate')}</button>
               <button onClick={() => onNavigate('vip')} className="cursor-pointer underline underline-offset-2">{t('footer.responsible')}</button>
-              <button onClick={() => alert('Terms and Conditions')} className="cursor-pointer underline underline-offset-2">{t('footer.terms')}</button>
-              <button onClick={() => alert('Krikya Bangladesh')} className="cursor-pointer underline underline-offset-2">{t('footer.about_us')}</button>
             </div>
             <p className="mt-4 text-[12px] font-medium text-[#666]">{language === 'bn' ? 'কপিরাইট © ২০২৬ Krikya। সর্বস্বত্ব সংরক্ষিত।' : 'Copyright © 2026 Krikya. All rights reserved.'}</p>
           </div>

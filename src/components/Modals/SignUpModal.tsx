@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { X, PlayCircle, Check, ArrowRight, ArrowLeft, ShieldCheck, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { KrikyaLogo } from '../KrikyaLogo';
 import { useLanguage } from '../../context/LanguageContext';
+import { errorMessage } from '../../platform/api';
+import { player, type Promotion } from '../../platform/player';
+import { useTenant } from '../../platform/tenant';
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -19,20 +22,23 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   onNavigateToDeposit,
 }) => {
   const { language, t } = useLanguage();
+  const tenant = useTenant();
+  const [promos, setPromos] = useState<Promotion[]>([]);
   const [step, setStep] = useState<1 | 2>(1);
-  const [username, setUsername] = useState('hgodkfgtr');
-  const [password, setPassword] = useState('pass123456');
-  const [confirmPassword, setConfirmPassword] = useState('pass123456');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   
   const [currency, setCurrency] = useState('BDT');
-  const [phoneNumber, setPhoneNumber] = useState('1768662245');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [referralCode, setReferralCode] = useState('');
-  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   useEffect(() => {
     const invitedBy = new URLSearchParams(window.location.search).get('ref');
     if (invitedBy) setReferralCode(invitedBy);
+    player.promotions().then(setPromos).catch(() => setPromos([]));
   }, []);
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -70,12 +76,22 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
 
   const handleFinishRegistration = async () => {
     setError('');
-    const userEmail = email || `${username}@user.krikya.com`;
     try {
-      const response = await fetch('/api/v1/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: username, email: userEmail, phone: `+880${phoneNumber}`, password, referralCode: referralCode || undefined }) });
-      const json = await response.json(); if (!response.ok) throw new Error(json.error?.message || 'Registration failed');
-      onSignUpSuccess({ username, phone: `+880${phoneNumber}`, email: userEmail }); setShowSuccessModal(false); onClose(); if (onNavigateToDeposit) onNavigateToDeposit();
-    } catch (error) { setShowSuccessModal(false); setError((error as Error).message); }
+      await player.register({
+        username: username.trim(),
+        password,
+        phone: `+880${phoneNumber.replace(/^0+/, '')}`,
+        ...(email.trim() ? { email: email.trim() } : {}),
+        ...(referralCode.trim() ? { referralCode: referralCode.trim() } : {}),
+      });
+      onSignUpSuccess({ username, phone: `+880${phoneNumber}`, email });
+      setShowSuccessModal(false);
+      onClose();
+      if (onNavigateToDeposit) onNavigateToDeposit();
+    } catch (err) {
+      setShowSuccessModal(false);
+      setError(errorMessage(err, 'Registration failed. Please try again.'));
+    }
   };
 
   return (
@@ -84,29 +100,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
       {!showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
           <div className="relative w-full max-w-[960px] bg-white rounded-xl shadow-2xl overflow-hidden border-2 md:border-4 border-[#2e694d] my-auto">
-            {/* Top Video Announcement Notice Bar (Screenshot 1 & 2) */}
-            <div className="bg-[#f8f9fa] border-b border-gray-200 px-4 py-2 flex items-center justify-between gap-2">
-              <span className="text-xs sm:text-sm font-semibold text-gray-800">
-                {t('register.video_notice')}
-              </span>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => alert('Opening registration video tutorial...')}
-                  className="bg-[#ff5a00] hover:bg-[#e04f00] text-white font-bold text-xs px-3 py-1 rounded-md shadow-xs transition flex items-center gap-1 cursor-pointer"
-                >
-                  {t('register.watch_video')}
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="w-6 h-6 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center justify-center transition cursor-pointer text-xs font-bold"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
             {/* Main Content Grid: Left Form & Right Promotional Artwork */}
             <div className="grid grid-cols-1 md:grid-cols-12 min-h-[460px]">
               {/* Left Form Section */}
@@ -305,17 +298,14 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
                       <h2 className="text-base sm:text-lg font-black text-[#ffb700] leading-tight">
-                        {t('promo.banner_top')}
+                        {tenant.name}
                       </h2>
-                      <p className="text-xs sm:text-sm font-black italic tracking-wide text-emerald-300 mt-0.5">
-                        {t('promo.banner_sub')}
-                      </p>
                     </div>
 
                     {/* Artwork Graphic (Dealer girl, lucky spin wheel, aviator jet) */}
                     <div className="w-24 h-20 sm:w-28 sm:h-24 shrink-0 relative">
                       <img
-                        src="https://images.unsplash.com/photo-1541278107931-e006523892df?w=200&auto=format&fit=crop&q=60"
+                        src="/banners/casino-gold.png"
                         alt="Promo visual"
                         className="w-full h-full object-cover rounded-lg border border-amber-400/40 shadow-md"
                       />
@@ -325,87 +315,14 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     </div>
                   </div>
 
-                  {/* 8 Bullet Points Grid (Screenshot 1 & 2) */}
+                  {/* The brand's live promotions */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2.5 mt-4 text-[11px] font-semibold text-gray-100">
-                    {/* Point 1 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-amber-500 text-black font-black text-[10px] flex items-center justify-center shrink-0">
-                        ৳
-                      </span>
-                      <span className="leading-tight text-amber-200">
-                        {t('promo.point_1')}
-                      </span>
-                    </div>
-
-                    {/* Point 2 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-amber-400 text-black font-black text-[10px] flex items-center justify-center shrink-0">
-                        👑
-                      </span>
-                      <span className="leading-tight text-white">
-                        {t('promo.point_2')}
-                      </span>
-                    </div>
-
-                    {/* Point 3 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-orange-500 text-white font-black text-[10px] flex items-center justify-center shrink-0">
-                        ↩
-                      </span>
-                      <span className="leading-tight text-white">
-                        {t('promo.point_3')}
-                      </span>
-                    </div>
-
-                    {/* Point 4 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-amber-300 text-black font-black text-[10px] flex items-center justify-center shrink-0">
-                        👥
-                      </span>
-                      <span className="leading-tight text-amber-100">
-                        {t('promo.point_4')}
-                      </span>
-                    </div>
-
-                    {/* Point 5 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-emerald-400 text-black font-black text-[10px] flex items-center justify-center shrink-0">
-                        💰
-                      </span>
-                      <span className="leading-tight text-emerald-200">
-                        {t('promo.point_5')}
-                      </span>
-                    </div>
-
-                    {/* Point 6 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-orange-400 text-black font-black text-[10px] flex items-center justify-center shrink-0">
-                        🤝
-                      </span>
-                      <span className="leading-tight text-orange-200">
-                        {t('promo.point_6')}
-                      </span>
-                    </div>
-
-                    {/* Point 7 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-amber-400 text-black font-black text-[10px] flex items-center justify-center shrink-0">
-                        🎁
-                      </span>
-                      <span className="leading-tight text-amber-200">
-                        {t('promo.point_7')}
-                      </span>
-                    </div>
-
-                    {/* Point 8 */}
-                    <div className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
-                      <span className="w-5 h-5 rounded-full bg-emerald-300 text-black font-black text-[10px] flex items-center justify-center shrink-0">
-                        🏪
-                      </span>
-                      <span className="leading-tight text-emerald-100">
-                        {t('promo.point_8')}
-                      </span>
-                    </div>
+                    {promos.slice(0, 8).map((promo) => (
+                      <div key={promo.id} className="flex items-start gap-2 bg-white/5 p-2 rounded-lg border border-white/10">
+                        <span className="w-5 h-5 rounded-full bg-amber-500 text-black font-black text-[10px] flex items-center justify-center shrink-0">৳</span>
+                        <span className="leading-tight text-amber-200">{promo.title}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

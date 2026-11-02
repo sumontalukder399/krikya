@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, PlayCircle, Eye, EyeOff, Lock, User } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { errorMessage } from '../../platform/api';
+import { player } from '../../platform/player';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -32,10 +34,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
     setLoading(true); setError('');
     try {
-      const response = await fetch('/api/v1/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: username, password }) });
-      const json = await response.json(); if (!response.ok) throw new Error(json.error?.message || 'Login failed');
+      await player.login(username.trim(), password);
       onLoginSuccess(); onClose();
-    } catch (error) { setError((error as Error).message); } finally { setLoading(false); }
+    } catch (err) { setError(errorMessage(err, 'Login failed. Please try again.')); } finally { setLoading(false); }
   };
 
   return (
@@ -53,29 +54,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* 2. Video Guide Announcement Bar (Screenshot 4) */}
-        <div className="bg-[#f8f9fa] border-b border-gray-200 px-4 py-2.5 flex items-center justify-between gap-2">
-          <span className="text-xs font-semibold text-gray-800 leading-tight">
-            {t('login.video_notice')}
-          </span>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              type="button"
-              onClick={() => alert('Opening password reset tutorial video...')}
-              className="bg-[#ff5a00] hover:bg-[#e04f00] text-white font-bold text-[11px] px-2.5 py-1 rounded-md shadow-xs transition cursor-pointer"
-            >
-              {t('login.watch_video')}
-            </button>
-            <button
-              type="button"
-              className="w-5 h-5 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center justify-center text-[10px] cursor-pointer"
-              onClick={() => {}}
-            >
-              ✕
-            </button>
-          </div>
         </div>
 
         {/* 3. Form Body */}
@@ -139,7 +117,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <div className="flex justify-end pt-0.5">
             <button
               type="button"
-              onClick={() => alert('Please contact 24/7 Live Support or use SMS Verification to recover your password.')}
+              onClick={() => setError('Please contact support to recover your password.')}
               className="text-xs text-gray-600 hover:text-[#2e694d] font-medium transition cursor-pointer"
             >
               {t('login.forgot_password')}

@@ -39,9 +39,7 @@ export interface UserProfile {
   username: string;
   isLoggedIn: boolean;
   walletBalance: number;
-  coinBalance: number;
   balance: number;
-  coins: number;
   vipLevel: string;
   vipDepositProgress: number;
   vipDepositTarget: number;
@@ -50,12 +48,8 @@ export interface UserProfile {
   phone: string;
   email: string;
   fullName: string;
-  dateOfBirth: string;
   currency: string;
   referralCode: string;
-  todayCommission: number;
-  thisMonthCommission: number;
-  commissionToRedeem: number;
   totalReferrals: number;
   totalCommission: number;
   unreadMessagesCount: number;

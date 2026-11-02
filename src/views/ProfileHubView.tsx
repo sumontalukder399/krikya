@@ -1,3 +1,4 @@
+import { useTenant } from '../platform/tenant';
 import React, { useState } from 'react';
 import { PageType, UserProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -39,7 +40,7 @@ interface ProfileHubViewProps {
   user: UserProfile;
   onNavigate: (page: PageType) => void;
   onOpenEditProfile?: () => void;
-  onOpenDailyCheckIn?: () => void;
+  onOpenContact?: () => void;
   onLogout: () => void;
 }
 
@@ -47,13 +48,13 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
   user,
   onNavigate,
   onOpenEditProfile,
-  onOpenDailyCheckIn,
+  onOpenContact,
   onLogout,
 }) => {
+  const tenant = useTenant();
   const { language, t } = useLanguage();
   const [showBalance, setShowBalance] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showNotice, setShowNotice] = useState(true);
 
   const handleRefreshBalance = () => {
     setIsRefreshing(true);
@@ -75,7 +76,7 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
 
           <div className="flex items-center gap-2">
             <span className="font-bold text-sm text-white tracking-wide">
-              {user.username || 'geaGRT5'}
+              {user.username}
             </span>
             <button
               onClick={handleRefreshBalance}
@@ -176,30 +177,6 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
           <ChevronRight className="w-4 h-4 text-slate-200" />
         </button>
       </div>
-
-      {/* 3. Video Tutorial Notice Bar matching Green Screenshot */}
-      {showNotice && (
-        <div className="bg-white rounded-lg border border-gray-200 px-3.5 py-2 flex items-center justify-between gap-2 shadow-xs">
-          <span className="text-[11px] font-medium text-gray-700 line-clamp-1">
-            {t('profile.video_notice')}
-          </span>
-
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={() => alert('Opening Krikya Voucher Redemption Tutorial Video...')}
-              className="bg-[#ff5a00] hover:bg-[#e04f00] text-white font-bold text-[11px] px-2.5 py-1 rounded-md shadow-xs transition cursor-pointer whitespace-nowrap"
-            >
-              {t('profile.watch_video')}
-            </button>
-            <button
-              onClick={() => setShowNotice(false)}
-              className="text-gray-400 hover:text-gray-600 p-0.5 cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* 4. Main Wallet Header Bar matching Green Screenshot */}
       <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center justify-between shadow-xs">
@@ -311,19 +288,6 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
             </span>
           </button>
 
-          {/* Transfer Record */}
-          <button
-            onClick={() => onNavigate('transfer-history')}
-            className="flex flex-col items-center justify-center p-2.5 sm:p-3 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <ArrowLeftRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center line-clamp-1">
-              {t('profile.transfer_record')}
-            </span>
-          </button>
-
           {/* Bonus */}
           <button
             onClick={() => onNavigate('bonus-history')}
@@ -347,89 +311,6 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
             </div>
             <span className="text-[10px] sm:text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center line-clamp-1">
               {t('profile.transaction_record')}
-            </span>
-          </button>
-
-          {/* Redemption Record */}
-          <button
-            onClick={() => onNavigate('redemption-history')}
-            className="flex flex-col items-center justify-center p-2.5 sm:p-3 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <Ticket className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center line-clamp-1">
-              {t('profile.redemption_record')}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* 7. Section: বিনামূল্যে কয়েন নিন (Earn Free Coins) */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
-        <div className="px-3.5 py-2 bg-gray-50/70 border-b border-gray-100 flex items-center gap-1.5">
-          <span className="text-[#2e694d] font-black text-sm">|</span>
-          <h4 className="text-xs font-bold text-gray-800">{t('profile.earn_free_coins')}</h4>
-        </div>
-        <div className="grid grid-cols-2 divide-x divide-gray-100">
-          {/* Daily Check-in */}
-          <button
-            onClick={onOpenDailyCheckIn || (() => alert('Daily Check-in Modal'))}
-            className="flex flex-col items-center justify-center p-3 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <CalendarCheck className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center">
-              {t('profile.daily_checkin')}
-            </span>
-          </button>
-
-          {/* Card Mania */}
-          <button
-            onClick={() => onNavigate('card-mania')}
-            className="flex flex-col items-center justify-center p-3 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <Layers className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center">
-              {t('profile.card_mania')}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* 8. Section: অফার/ পুরষ্কার নিন (Offers & Rewards) */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
-        <div className="px-3.5 py-2 bg-gray-50/70 border-b border-gray-100 flex items-center gap-1.5">
-          <span className="text-[#2e694d] font-black text-sm">|</span>
-          <h4 className="text-xs font-bold text-gray-800">{t('profile.offers_rewards')}</h4>
-        </div>
-        <div className="grid grid-cols-2 divide-x divide-gray-100">
-          {/* Fortune Spin */}
-          <button
-            onClick={() => onNavigate('fortune-spin')}
-            className="flex flex-col items-center justify-center p-3 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <Disc className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center">
-              {t('profile.fortune_spin')}
-            </span>
-          </button>
-
-          {/* Reward Store */}
-          <button
-            onClick={() => onNavigate('reward-store')}
-            className="flex flex-col items-center justify-center p-3 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <Store className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center">
-              {t('profile.reward_store')}
             </span>
           </button>
         </div>
@@ -465,19 +346,6 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
             </div>
             <span className="text-[10px] sm:text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center line-clamp-1">
               {t('profile.change_password')}
-            </span>
-          </button>
-
-          {/* Bank Details */}
-          <button
-            onClick={() => onNavigate('bank-details')}
-            className="flex flex-col items-center justify-center p-2.5 sm:p-3 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <Landmark className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center line-clamp-1">
-              {t('profile.bank_details')}
             </span>
           </button>
 
@@ -523,7 +391,7 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
         <div className="grid grid-cols-4 divide-x divide-gray-100">
           {/* 24/7 Support */}
           <button
-            onClick={() => alert('Connecting to 24/7 Customer Live Support...')}
+            onClick={onOpenContact}
             className="flex flex-col items-center justify-center p-2.5 sm:p-3 hover:bg-orange-50/50 transition cursor-pointer group"
           >
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
@@ -536,7 +404,7 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
 
           {/* WhatsApp */}
           <a
-            href="https://wa.me"
+            href={tenant.social?.whatsapp || 'https://wa.me'}
             target="_blank"
             rel="noreferrer"
             className="flex flex-col items-center justify-center p-2.5 sm:p-3 hover:bg-orange-50/50 transition cursor-pointer group"
@@ -551,7 +419,7 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
 
           {/* Telegram */}
           <a
-            href="https://t.me"
+            href={tenant.social?.telegram || 'https://t.me'}
             target="_blank"
             rel="noreferrer"
             className="flex flex-col items-center justify-center p-2.5 sm:p-3 hover:bg-orange-50/50 transition cursor-pointer group"
@@ -566,7 +434,7 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
 
           {/* Facebook */}
           <a
-            href="https://facebook.com"
+            href={tenant.social?.facebook || 'https://facebook.com'}
             target="_blank"
             rel="noreferrer"
             className="flex flex-col items-center justify-center p-2.5 sm:p-3 hover:bg-orange-50/50 transition cursor-pointer group"
@@ -578,27 +446,6 @@ export const ProfileHubView: React.FC<ProfileHubViewProps> = ({
               {t('profile.facebook')}
             </span>
           </a>
-        </div>
-      </div>
-
-      {/* 11. Section: ডাউনলোড করুন (Download) */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
-        <div className="px-3.5 py-2 bg-gray-50/70 border-b border-gray-100 flex items-center gap-1.5">
-          <span className="text-[#2e694d] font-black text-sm">|</span>
-          <h4 className="text-xs font-bold text-gray-800">{t('profile.download')}</h4>
-        </div>
-        <div>
-          <button
-            onClick={() => alert('Downloading official Krikya Android APK...')}
-            className="w-full flex flex-col items-center justify-center p-3.5 hover:bg-orange-50/50 transition cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-full bg-orange-50 text-[#ff5a00] flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
-              <Smartphone className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <span className="text-[11px] font-semibold text-gray-700 group-hover:text-[#ff5a00] transition text-center">
-              {t('profile.download_app')}
-            </span>
-          </button>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTenant } from '../platform/tenant';
 
 interface KrikyaLogoProps {
   className?: string;
@@ -13,6 +14,13 @@ export const KrikyaLogo: React.FC<KrikyaLogoProps> = ({
   showText = true,
   variant = 'white'
 }) => {
+  const tenant = useTenant();
+  const [logoFailed, setLogoFailed] = useState(false);
+  const logoRef = useRef<HTMLImageElement>(null);
+  // A server-rendered image can fail before hydration, when onError is not listening yet.
+  useEffect(() => {
+    if (logoRef.current?.complete && logoRef.current.naturalWidth === 0) setLogoFailed(true);
+  }, []);
   const iconDimensions = {
     sm: 'w-6 h-5',
     md: 'w-8 h-7',
@@ -33,6 +41,11 @@ export const KrikyaLogo: React.FC<KrikyaLogoProps> = ({
       : variant === 'green' 
         ? 'text-[#2e694d]' 
         : 'text-gray-900';
+
+  // A logo uploaded in the admin panel replaces the built-in one.
+  if (tenant.logoUrl && !logoFailed) {
+    return <img ref={logoRef} src={tenant.logoUrl} alt={tenant.name} onError={() => setLogoFailed(true)} className={`h-8 w-auto object-contain ${className}`} />;
+  }
 
   return (
     <div className={`inline-flex items-center gap-2 font-black tracking-wider select-none cursor-pointer ${className}`}>

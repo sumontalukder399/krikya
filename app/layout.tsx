@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import '../src/index.css';
-import { VisitorTracker } from '@/src/components/VisitorTracker';
+import { TenantProvider } from '@/src/platform/tenant';
+import { getTenant } from '@/src/platform/server-tenant';
 
-export const metadata: Metadata = {
-  title: 'Krikya Official Site | Trusted Online Gaming & Sportsbook Bangladesh',
-  description:
-    'Premier Online Gaming and Sportsbook Platform in Bangladesh. Deshi Krikya, Beshi Joy!',
-  icons: {
-    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
-    shortcut: '/icon.svg',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenant();
+  const icon = tenant.faviconUrl || '/icon.svg';
+  return {
+    title: `${tenant.name} | Online Gaming & Sportsbook Bangladesh`,
+    description: `Online gaming and sportsbook platform in Bangladesh. Play on ${tenant.name}.`,
+    icons: { icon: [{ url: icon }], shortcut: icon },
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -20,7 +21,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const tenant = await getTenant();
   return (
     <html lang="en">
       <head>
@@ -32,8 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         />
       </head>
       <body className="bg-[#f2f4f7] text-[#333333] font-sans antialiased selection:bg-[#ff5a00] selection:text-white">
-        <VisitorTracker />
-        {children}
+        <TenantProvider tenant={tenant}>{children}</TenantProvider>
       </body>
     </html>
   );

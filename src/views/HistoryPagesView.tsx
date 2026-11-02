@@ -1,14 +1,57 @@
 import React, { useEffect, useState } from 'react';
-import { PageType, UserProfile } from '../types';
 import { ArrowLeft } from 'lucide-react';
+import { PageType } from '../types';
+import { errorMessage } from '../platform/api';
+import { player, type LedgerEntry, type Wagering } from '../platform/player';
 
-interface Props { type: 'betting'|'turnover'|'transfer'|'bonus'|'transaction'|'redemption'; onNavigate:(page:PageType)=>void; user:UserProfile }
-type Row={_id:string;reference?:string;createdAt:string;type:string;method?:string;game?:string;note?:string;amount:number;bonus:number;status:string};
-const filters:Record<Props['type'],string>={betting:'bet',turnover:'bet',transfer:'transfer',bonus:'bonus',transaction:'',redemption:''};
-const titles:Record<Props['type'],string>={betting:'Betting Record',turnover:'Turnover History',transfer:'Transfer History',bonus:'Bonus History',transaction:'Transaction Record',redemption:'Redemption History'};
+type HistoryType = 'betting' | 'turnover' | 'bonus' | 'transaction';
+const TITLES: Record<HistoryType, string> = { betting: 'Betting Record', turnover: 'Turnover History', bonus: 'Bonus History', transaction: 'Transaction Record' };
+const money = (minor: number, currency = 'BDT') => `${currency} ${(minor / 100).toFixed(2)}`;
 
-export const HistoryPagesView:React.FC<Props>=({type,onNavigate})=>{
- const[period,setPeriod]=useState('30days'),[rows,setRows]=useState<Row[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState('');
- useEffect(()=>{const end=new Date(),start=new Date();start.setDate(end.getDate()-(period==='today'?0:period==='yesterday'?1:period==='7days'?7:30));const params=new URLSearchParams({limit:'50',start:start.toISOString().slice(0,10),end:end.toISOString().slice(0,10)});if(filters[type])params.set('type',filters[type]);setLoading(true);fetch(`/api/v1/transactions?${params}`).then(async r=>{const j=await r.json();if(!r.ok)throw new Error(j.error?.message||'Could not load history');setRows(j.data.rows)}).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[type,period]);
- return <div className="mx-auto max-w-4xl space-y-4 px-2 pb-14 sm:px-4"><button onClick={()=>onNavigate('profile-hub')} className="flex items-center gap-1 rounded-lg border bg-white px-3 py-1.5 text-xs font-bold"><ArrowLeft className="size-4"/>Back to Account Hub</button><div className="rounded-2xl bg-gradient-to-r from-[#072718] to-[#146b41] p-5 text-white"><h1 className="text-xl font-black uppercase">{titles[type]}</h1><p className="mt-1 text-xs text-emerald-100">Records stored for your authenticated account.</p></div><div className="flex gap-1 overflow-x-auto rounded-xl border bg-white p-3 text-xs font-bold">{['today','yesterday','7days','30days'].map(x=><button key={x} onClick={()=>setPeriod(x)} className={`rounded-lg px-3 py-1.5 ${period===x?'bg-[#0e5332] text-white':'bg-gray-100'}`}>{x}</button>)}</div><div className="overflow-x-auto rounded-2xl border bg-white"><table className="w-full min-w-[650px] text-left text-xs"><thead className="border-b bg-gray-50 text-gray-500"><tr><th className="p-3">Reference / ID</th><th className="p-3">Date & Time</th><th className="p-3">Details</th><th className="p-3 text-right">Amount</th><th className="p-3 text-right">Status</th></tr></thead><tbody>{rows.map(r=><tr className="border-b" key={r._id}><td className="p-3 font-mono">{r.reference||r._id.slice(-10).toUpperCase()}</td><td className="p-3">{new Date(r.createdAt).toLocaleString()}</td><td className="p-3 font-bold capitalize">{r.type}{r.method?` · ${r.method}`:''}{r.game?` · ${r.game}`:''}</td><td className="p-3 text-right font-mono font-bold">BDT {Number(r.amount).toFixed(2)}</td><td className="p-3 text-right capitalize">{r.status}</td></tr>)}</tbody></table>{loading&&<p className="p-10 text-center text-sm text-gray-400">Loading…</p>}{error&&<p className="p-5 text-center text-sm text-red-600">{error}</p>}{!loading&&!error&&!rows.length&&<p className="p-10 text-center text-sm text-gray-400">No records found</p>}</div></div>;
+export const HistoryPagesView: React.FC<{ type: HistoryType; onNavigate: (page: PageType) => void }> = ({ type, onNavigate }) => {
+  const [rows, setRows] = useState<LedgerEntry[]>([]);
+  const [wagering, setWagering] = useState<Wagering | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    setError('');
+    const filter = type === 'bonus' ? 'BONUS' : type === 'betting' ? 'BET' : undefined;
+    Promise.all([player.ledger({ type: filter }), type === 'turnover' ? player.wagering() : Promise.resolve(null)])
+      .then(([ledger, progress]) => { setRows(ledger.items); setWagering(progress); })
+      .catch((err) => setError(errorMessage(err, 'Could not load records.')))
+      .finally(() => setLoading(false));
+  }, [type]);
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-4 px-2 pb-14 pt-4 sm:px-4">
+      <button onClick={() => onNavigate('profile-hub')} className="flex cursor-pointer items-center gap-1 rounded-lg border bg-white px-3 py-1.5 text-xs font-bold text-gray-700"><ArrowLeft className="h-4 w-4" />Back</button>
+      <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
+        <h1 className="text-base font-extrabold text-gray-800">{TITLES[type]}</h1>
+        {wagering && (
+          <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+            Remaining turnover before withdrawal: {money(wagering.remainingMinor)}
+          </p>
+        )}
+        {loading && <p className="text-xs text-gray-500">Loading...</p>}
+        {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
+        {!loading && !error && rows.length === 0 && <p className="py-6 text-center text-xs text-gray-500">No records yet.</p>}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px] text-left text-xs">
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id} className="border-t border-gray-100">
+                  <td className="py-2 pr-3 text-gray-500">{new Date(row.createdAt).toLocaleString()}</td>
+                  <td className="py-2 pr-3 font-bold text-gray-800">{row.type}</td>
+                  <td className="py-2 pr-3 text-gray-600">{row.description ?? row.reference ?? ''}</td>
+                  <td className="py-2 text-right font-mono font-bold text-gray-900">{money(row.amountMinor, row.currency)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 };

@@ -36,8 +36,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Modals - Login
     'login.welcome': 'KRIKYA এ স্বাগতম',
-    'login.video_notice': 'কীভাবে Krikya পাসওয়ার্ড রিসেট করবেন? আরও জানতে বাটনটিতে ক্লিক করুন।',
-    'login.watch_video': 'ভিডিও দেখুন',
     'login.username': 'ব্যবহারকারীর নাম',
     'login.password': 'পাসওয়ার্ড',
     'login.forgot_password': 'পাসওয়ার্ড ভুলে গেছেন',
@@ -48,8 +46,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Modals - Register Step 1 & 2 & 3
     'register.tab_title': 'নিবন্ধন',
-    'register.video_notice': 'কীভাবে Krikya তে নিবন্ধন করবেন? আরও জানতে বাটনটিতে ক্লিক করুন।',
-    'register.watch_video': 'ভিডিও দেখুন',
     'register.username': 'ব্যবহারকারীর নাম',
     'register.password': 'পাসওয়ার্ড',
     'register.confirm_password': 'পাসওয়ার্ড নিশ্চিত করুন',
@@ -68,20 +64,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'register.deposit_now_btn': 'এখনই জমা দিন',
 
     // Register Banner Points (Screenshot 1 & 2)
-    'promo.banner_top': 'এখন প্রতি ডিপোজিটে পাচ্ছেন ৮% ইনস্ট্যান্ট ক্যাশ! (১x TO)!',
-    'promo.banner_sub': 'DESHI KRIKYA, BESHI REWARDS!',
-    'promo.point_1': '৳২০,০০০ পর্যন্ত ৫০০% স্বাগতম বোনাস',
-    'promo.point_2': 'ভিআইপি প্রোগ্রাম মাসিক লাকি ড্র ৳২০০,০০০ পর্যন্ত নগদ পুরষ্কার জিতুন',
-    'promo.point_3': 'সাপ্তাহিক ক্ষতির ৳৭০,০০০ পর্যন্ত ক্যাশব্যাক',
-    'promo.point_4': '৪২৫% সর্বাধিক ৳১০,৪০০,০০০ রেফারেল কমিশন উপার্জন করুন + ৳১,২০০ আনলিমিটেড ফ্রি বোনাস!',
-    'promo.point_5': 'আনলিমিটেড ৮% ইনস্ট্যান্ট ক্যাশ বোনাস (শুধুমাত্র ১x TO)!',
-    'promo.point_6': 'সাপ্তাহিক পেআউট ৫৫% অ্যাফিলিয়েট কমিশন',
-    'promo.point_7': 'বিশাল সাপ্তাহিক লাকি ড্র জিতে নিন iPhone 17 Pro অথবা ৳৯৮,০০০',
-    'promo.point_8': 'বাংলাদেশের প্রথম বারের মতো রিওয়ার্ড স্টোর !',
 
     // Home Page
     'home.announcement_title': 'গুরুত্বপূর্ণ ঘোষণা',
-    'home.announcement_text': '📢 গুরুত্বপূর্ণ ঘোষণা 📢 অনুগ্রহ করে লক্ষ্য করুন, KRIKYA কখনোই তৃতীয় পক্ষের কোনো অ্যাকাউন্টে টাকা পাঠাতে বলবে না। আপনার ব্যালেন্স ও ডিপোজিট সুরক্ষিত রাখুন। BKASH, Nagad-SpeedPay, এবং Rocket অটো ডিপোজিটে ৮% আনলিমিটেড ইন্সট্যান্ট ক্যাশ বোনাস ২৪/৭ চালু আছে।',
     'home.live_winners_title': 'Live Betting: Real Time Winners Happening Right Now',
     'home.bet_amount': 'Bet Amount :',
     'home.won': 'Won',
@@ -103,8 +88,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'profile.deposit_needed': 'আমানত প্রয়োজন : ৳',
     'profile.turnover_needed': 'টার্নওভার প্রয়োজন : ৳',
     'profile.view_tier_benefits': 'টিয়ার সুবিধাগুলি দেখুন',
-    'profile.video_notice': 'Krikya তে কীভাবে ভাউচার রিডিম করবেন? আরও জানতে বাটনটিতে ক্লিক করুন।',
-    'profile.watch_video': 'ভিডিও দেখুন',
     'profile.main_wallet': 'প্রধান ওয়ালেট',
     'profile.funds': 'তহবিল',
     'profile.deposit': 'ডিপোজিট',
@@ -141,12 +124,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Footer
     'footer.payment_methods': 'মূল্য পরিশোধ পদ্ধতি',
     'footer.responsible_gaming': 'Responsible Gaming',
-    'footer.certification': 'সার্টিফিকেশন',
     'footer.follow_us': 'Follow Us',
     'footer.affiliate': 'অধিভুক্ত',
     'footer.responsible': 'দায়িত্বশীল গেমিং',
-    'footer.terms': 'শর্তাবলী',
-    'footer.about_us': 'আমাদের সম্পর্কে',
     'footer.copyright': 'কপিরাইট © ২০২৬ [ ব্র্যান্ড ]। সমস্ত অধিকার সংরক্ষিত',
   },
   en: {
@@ -176,8 +156,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Modals - Login
     'login.welcome': 'Welcome to KRIKYA',
-    'login.video_notice': 'How to Reset Password in Krikya? Click the button to know more.',
-    'login.watch_video': 'Watch Video',
     'login.username': 'Username',
     'login.password': 'Password',
     'login.forgot_password': 'Forgot Password?',
@@ -188,8 +166,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Modals - Register Step 1 & 2 & 3
     'register.tab_title': 'Sign Up',
-    'register.video_notice': 'How to Register in Krikya? Click the button to know more.',
-    'register.watch_video': 'Watch Video',
     'register.username': 'Username',
     'register.password': 'Password',
     'register.confirm_password': 'Confirm Password',
@@ -208,20 +184,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'register.deposit_now_btn': 'Deposit Now',
 
     // Register Banner Points (Screenshot 1 & 2)
-    'promo.banner_top': 'NOW ENJOY 8% INSTANT CASH ON EVERY DEPOSIT! (1x TO)!',
-    'promo.banner_sub': 'DESHI KRIKYA, BESHI REWARDS!',
-    'promo.point_1': '500% Welcome Bonus up to ৳20,000',
-    'promo.point_2': 'VIP Monthly Lucky Draw win cash prizes up to ৳200,000',
-    'promo.point_3': 'Weekly Loss Cashback up to ৳70,000',
-    'promo.point_4': '425% Max ৳10,400,000 Referral Commission + ৳1,200 Unlimited Free Bonus!',
-    'promo.point_5': 'Unlimited 8% Instant Cash Bonus (Only 1x TO)!',
-    'promo.point_6': 'Weekly Payout 55% Affiliate Commission',
-    'promo.point_7': 'Huge Weekly Lucky Draw win iPhone 17 Pro or ৳98,000',
-    'promo.point_8': "Bangladesh's 1st Ever Reward Store!",
 
     // Home Page
     'home.announcement_title': 'IMPORTANT ANNOUNCEMENT',
-    'home.announcement_text': '📢 IMPORTANT ANNOUNCEMENT 📢 Please note, KRIKYA will never ask you to transfer funds to any third-party personal account. Keep your balance and deposits secure. BKASH, Nagad-SpeedPay, and Rocket auto-deposits with 8% Unlimited Instant Cash Bonus are active 24/7.',
     'home.live_winners_title': 'Live Betting: Real Time Winners Happening Right Now',
     'home.bet_amount': 'Bet Amount :',
     'home.won': 'Won',
@@ -243,8 +208,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'profile.deposit_needed': 'Deposit Needed : ৳',
     'profile.turnover_needed': 'Turnover Needed : ৳',
     'profile.view_tier_benefits': 'View Tier Privileges',
-    'profile.video_notice': 'How to redeem vouchers in Krikya? Click the button to know more.',
-    'profile.watch_video': 'Watch Video',
     'profile.main_wallet': 'Main Wallet',
     'profile.funds': 'Funds',
     'profile.deposit': 'Deposit',
@@ -281,12 +244,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Footer
     'footer.payment_methods': 'Payment Methods',
     'footer.responsible_gaming': 'Responsible Gaming',
-    'footer.certification': 'Certification',
     'footer.follow_us': 'Follow Us',
     'footer.affiliate': 'Affiliate',
     'footer.responsible': 'Responsible Gaming',
-    'footer.terms': 'Terms & Conditions',
-    'footer.about_us': 'About Us',
     'footer.copyright': 'Copyright © 2026 [ Brand ]. All rights reserved.',
   },
 };

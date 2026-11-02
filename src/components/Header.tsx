@@ -109,13 +109,6 @@ export const Header: React.FC<HeaderProps> = ({
       page: 'vip' as PageType,
       hasDropdown: false,
     },
-    {
-      id: 'krikbet',
-      label: t('nav.krikbet'),
-      page: 'krikbet' as PageType,
-      hasDropdown: false,
-      isChallenge: true,
-    },
   ];
 
   return (
