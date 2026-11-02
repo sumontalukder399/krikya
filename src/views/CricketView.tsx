@@ -10,8 +10,8 @@ export const CricketView: React.FC<{ onPlayGame: (game: Game) => void }> = ({ on
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([player.games({ provider: '9Wickets' }), player.games({ category: 'sports' })])
-      .then(([exchange, sports]) => setGames([...exchange.items, ...sports.items]))
+    player.sportsbooks()
+      .then(setGames)
       .catch((err) => setError(errorMessage(err, 'Could not load cricket betting.')))
       .finally(() => setLoading(false));
   }, []);

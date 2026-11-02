@@ -30,7 +30,7 @@ export const SportsbookView: React.FC<{ onPlayGame: (game: Game) => void }> = ({
   const [error, setError] = useState('');
 
   useEffect(() => {
-    player.games({ category: 'sports' }).then((res) => setGames(res.items)).catch((err) => setError(errorMessage(err, 'Could not load sportsbooks.'))).finally(() => setLoading(false));
+    player.sportsbooks().then(setGames).catch((err) => setError(errorMessage(err, 'Could not load sportsbooks.'))).finally(() => setLoading(false));
   }, []);
 
   return (

@@ -129,6 +129,12 @@ export const player = {
     apiFetch<GamesPage>(`/public/games?${qs({ tenant: TENANT_SLUG, limit: 60, ...query })}`),
   providers: (category?: string) =>
     apiFetch<ProviderInfo[]>(`/public/games/providers-detailed?${qs({ tenant: TENANT_SLUG, category })}`),
+  /** The books themselves. `games({ category: 'sports' })` also returns the whole slot catalogue, so go provider by provider. */
+  sportsbooks: async () => {
+    const providers = await player.providers('sports');
+    const pages = await Promise.all(providers.map((p) => player.games({ provider: p.key })));
+    return pages.flatMap((page) => page.items);
+  },
   launchGame: (gameId: string) =>
     apiFetch<{ launchUrl: string; gameName: string; mode: string }>(`/player/games/${gameId}/launch`, post({ surface: 'public' })),
   /** Brings money back from a transfer-wallet provider when the player leaves a game. */
