@@ -147,7 +147,7 @@ export const player = {
   paymentMethods: (flow: 'deposit' | 'withdrawal') => apiFetch<PaymentMethod[]>(`/player/payment-methods?${qs({ type: flow })}`),
   paymentAccounts: (methodId: string, flow: 'deposit' | 'withdrawal' = 'deposit') =>
     apiFetch<PaymentAccount[]>(`/player/payment-accounts?${qs({ methodId, type: flow })}`),
-  deposit: (input: { paymentMethodId: string; paymentAccountId: string; amount: number; currency: string; transactionReference: string; promotionId: string }) =>
+  deposit: (input: { paymentMethodId: string; paymentAccountId: string; amount: number; currency: string; transactionReference: string; promotionId?: string }) =>
     apiFetch<{ id: string; status: string }>('/player/deposits', post(input, { 'Idempotency-Key': idempotencyKey() })),
   startGatewayDeposit: (input: { paymentMethodId: string; amount: number; currency: string; channelKey?: string }) =>
     apiFetch<{ id: string; paymentUrl: string; status: string }>('/player/deposits/gateway', post(input, { 'Idempotency-Key': idempotencyKey() })),

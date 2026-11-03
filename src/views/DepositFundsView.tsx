@@ -41,7 +41,12 @@ const DepositForm: React.FC<{ onCredited: () => void }> = ({ onCredited }) => {
   const [accountId, setAccountId] = useState('');
   const [channel, setChannel] = useState('');
   const [promos, setPromos] = useState<Promotion[]>([]);
-  const [promotionId, setPromotionId] = useState('none');
+  /*
+   * 'auto' sends no choice, so the server pays the best bonus the deposit
+   * qualifies for, Bonus Engine rules such as the first-deposit bonus included.
+   * 'none' is the player saying "no bonus", so it is never the default.
+   */
+  const [promotionId, setPromotionId] = useState('auto');
   const [amount, setAmount] = useState('1000');
   const [trx, setTrx] = useState('');
   const [busy, setBusy] = useState(false);
@@ -134,7 +139,7 @@ const DepositForm: React.FC<{ onCredited: () => void }> = ({ onCredited }) => {
     if (!trx.trim()) { setError('Enter the Transaction ID from your payment.'); return; }
     setBusy(true);
     try {
-      await player.deposit({ paymentMethodId: method.id, paymentAccountId: account.id, amount: minor, currency: method.currency, transactionReference: trx.trim(), promotionId });
+      await player.deposit({ paymentMethodId: method.id, paymentAccountId: account.id, amount: minor, currency: method.currency, transactionReference: trx.trim(), ...(promotionId === 'auto' ? {} : { promotionId }) });
       setStatus('Deposit submitted. It will be added after it is checked.');
       setTrx('');
     } catch (err) {
@@ -172,7 +177,8 @@ const DepositForm: React.FC<{ onCredited: () => void }> = ({ onCredited }) => {
             <div>
               <label className="mb-1 block font-black text-gray-700">2. Select Bonus Promotion</label>
               <select value={promotionId} onChange={(e) => setPromotionId(e.target.value)} className="w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-2.5 font-bold outline-none">
-                <option value="none">Regular Deposit</option>
+                <option value="auto">Best bonus (automatic)</option>
+                <option value="none">Regular Deposit (no bonus)</option>
                 {promos.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
               </select>
             </div>
